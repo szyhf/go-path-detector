@@ -1,0 +1,9 @@
+language: go
+go:
+    - 1.10.x
+services:
+    - docker
+install:
+    - docker build -t go-path-detector-test .
+script:
+    - docker run --rm -it go-path-detector-test:latest
