@@ -11,6 +11,8 @@ import (
 type Detector interface {
 	// 根据传入的结构体进行搜索
 	Detect(i interface{}) error
+	// 直接指定初始目录路径
+	WithDir(dir string) Detector
 	// 统一设置所有环境变量的前缀
 	WithEnvPrefix(prefix string) Detector
 	// 统一设置所有文件的分隔符，默认为`.`
@@ -51,6 +53,7 @@ type detector struct {
 	envPrefix string
 
 	directoryNameParseType NameParseTypeID
+	dir                    string
 	dirEnvKey              string
 	dirSplit               string
 	dirPrioirity           []string
@@ -66,6 +69,18 @@ func (this *detector) Detect(i interface{}) error {
 	v := reflect.ValueOf(i)
 	if t.Kind() != reflect.Ptr {
 		return fmt.Errorf("%T不是Ptr", i)
+	}
+
+	// 如果直接指定了初始目录，则只使用该目录，失败了就报错
+	if this.dir != "" {
+		if !dirExist(this.dir) {
+			return fmt.Errorf("指定目录'%s'不存在", this.dir)
+		}
+		if err = this.tryDetector(this.dir, v); err == nil {
+			return nil
+		} else {
+			return fmt.Errorf("无法根据根指定目录'%s'提供的参数%s推导: %s", this.dir, this.dir, err.Error())
+		}
 	}
 
 	// 首先如果环境变量设置了，则只使用环境变量，失败了就报错
@@ -131,6 +146,12 @@ func (this *detector) WithFileSplit(split string) Detector {
 // 会尝试优先根据`dirEnv`的配置值设置工作目录
 func (this *detector) WithDirEnvKey(dirEnv string) Detector {
 	this.dirEnvKey = dirEnv
+	return this
+}
+
+// 直接指定初始目录路径
+func (this *detector) WithDir(dir string) Detector {
+	this.dir = dir
 	return this
 }
 
