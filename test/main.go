@@ -14,6 +14,8 @@ type Work struct {
 	Conf Conf `pd:"Key(CONF_DIR);"`
 	// 测试默认推导
 	Runtimes Runtimes
+	// 测试推断
+	InferFile string `pd:"Infer()"`
 }
 
 type Conf struct {
@@ -65,4 +67,6 @@ func main() {
 		log.Printf("%+v", string(data))
 		log.Fatal(err)
 	}
+	data, _ := json.MarshalIndent(work, "", "\t")
+	log.Printf("%s", string(data))
 }

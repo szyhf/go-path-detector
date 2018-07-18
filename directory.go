@@ -63,6 +63,11 @@ func (this *dirSchema) detector() (err error) {
 			if this.ParentDir != nil {
 				if curPath := dirJoin(this.ParentDir.Path, this.Name); curPath != "" {
 					return curPath, nil
+				} else if this.fieldTag.Infer {
+					// 如果允许推断，则直接使用根据父目录的推断结果
+					// 如果当前目录中还有成员需要推断，仍然会继续工作
+					// 因为可以有例如Priority()、Env等途径写入可用的路径
+					return filepath.Join(this.ParentDir.Path, this.Name), nil
 				}
 			}
 			return "", fmt.Errorf("找不到%s的实际路径", this.Name)

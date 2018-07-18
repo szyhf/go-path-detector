@@ -34,6 +34,9 @@ type envTag struct {
 	Path string
 	// 优先搜索目录
 	Priority []string
+	// 如果设置了该项，则当探测失败时
+	// 基于其父目录和当前文件名，组合当前文件的路径并写入
+	Infer bool
 }
 
 func parseTag(tag reflect.StructTag) envTag {
@@ -74,6 +77,8 @@ func parseTag(tag reflect.StructTag) envTag {
 			et.Priority = strings.Split(match[2], "|")
 		case "Path":
 			et.Path = match[2]
+		case "Infer":
+			et.Infer = true
 		default:
 			panic("未知的tag：" + match[1])
 		}
