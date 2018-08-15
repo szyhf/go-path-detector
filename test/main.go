@@ -54,14 +54,17 @@ func main() {
 	// log.SetFlags(// log.Ldate | // log.Ltime | // log.Llongfile)
 	// detector.SetLogger(os.Stdout, "[DEBUG]", log.Ldate|log.Ltime|log.Llongfile)
 
-	work := &Work{}
+	// 嵌套组合可以更快捷的优化组装
+	work := &struct {
+		Work
+	}{}
 
 	detector := detector.NewDetector().
 		WithEnvPrefix("ENV").
 		WithDirEnvKey("ENV_DIR") //.Debug(os.Stdout)
 	// WithFileSplit("-")
 	err := detector.
-		Detect(work)
+		Detect(&work.Work)
 	if err != nil {
 		data, _ := json.MarshalIndent(work, "", "\t")
 		log.Printf("%+v", string(data))

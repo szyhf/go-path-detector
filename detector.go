@@ -93,16 +93,7 @@ func (this *detector) Detect(i interface{}) error {
 		}
 	}
 
-	// 先用os.Args[0]尝试（可执行文件所在的目录尝试）
-	if baseDir := this.getBaseDirByOSArgs(); baseDir != "" {
-		// log.Println("ArgsBaseDir", baseDir)
-		if err = this.tryDetector(baseDir, v); err == nil {
-			return nil
-		} else {
-			err = fmt.Errorf("无法根据OSArgs[0]=%s推导：%s", baseDir, err.Error())
-		}
-	}
-	// 再用命令执行目录尝试（兼容go run）
+	// 用命令执行目录尝试（兼容go run）
 	if baseDir := this.getBaseDirByWD(); baseDir != "" {
 		// log.Println("OSWDBaseDir", baseDir)
 		if err2 := this.tryDetector(baseDir, v); err2 == nil {
@@ -113,6 +104,15 @@ func (this *detector) Detect(i interface{}) error {
 			} else {
 				err = err2
 			}
+		}
+	}
+	// 用os.Args[0]尝试（可执行文件所在的目录尝试）
+	if baseDir := this.getBaseDirByOSArgs(); baseDir != "" {
+		// log.Println("ArgsBaseDir", baseDir)
+		if err = this.tryDetector(baseDir, v); err == nil {
+			return nil
+		} else {
+			err = fmt.Errorf("无法根据OSArgs[0]=%s推导：%s", baseDir, err.Error())
 		}
 	}
 
